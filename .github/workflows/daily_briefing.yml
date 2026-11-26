@@ -1,0 +1,48 @@
+name: Daily X Briefing Video
+
+on:
+  workflow_dispatch:
+    inputs:
+      voice:
+        description: "edge-tts voice"
+        required: false
+        default: "zh-CN-XiaoxiaoNeural"
+      rate:
+        description: "Speech rate"
+        required: false
+        default: "+8%"
+  schedule:
+    # Runs daily at 07:30 Beijing Time (23:30 UTC)
+    - cron: "30 23 * * *"
+
+jobs:
+  build-video:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Chinese fonts for clean rendering
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install Python dependencies & Chromium
+        run: |
+          uv sync
+          uv run playwright install chromium
+          uv run playwright install-deps chromium
+
+      - name: Generate today's 4:5 briefing video
+        run: |
+          uv run python build_video.py --voice "${{ github.event.inputs.voice || 'zh-CN-XiaoxiaoNeural' }}" --rate "${{ github.event.inputs.rate || '+8%' }}"
+
+      - name: Upload MP4 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-x-briefing-${{ github.run_number }}
+          path: output/*.mp4
+          retention-days: 14

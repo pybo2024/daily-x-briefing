@@ -1,0 +1,12 @@
+# Virtual environment & caches
+.venv/
+__pycache__/
+*.py[cod]
+.build_tmp/
+
+# Generated videos (download from Releases/Artifacts or local output/)
+output/*.mp4
+
+# OS files
+.DS_Store
+Thumbs.db

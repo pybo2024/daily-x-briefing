@@ -1,0 +1,44 @@
+[
+  {
+    "category": "AI 科技",
+    "source": "Hacker News",
+    "title": "Head of Software Engineering – NOX Metals",
+    "summary": "Comments URL: https://news.ycombinator.com/item?id=50654353 Points: 0 # Comments: 0",
+    "link": "https://news.ycombinator.com/item?id=50654353"
+  },
+  {
+    "category": "AI 科技",
+    "source": "Hacker News",
+    "title": "Intel One Mono font",
+    "summary": "Article URL: https://github.com/intel/intel-one-mono Comments URL: https://news.ycombinator.com/item?id=50653667 Points: 93 # Comments: 55",
+    "link": "https://github.com/intel/intel-one-mono"
+  },
+  {
+    "category": "AI 科技",
+    "source": "TechCrunch AI",
+    "title": "S&P considers Nvidia credit downgrade over governance and ‘key man’ risks",
+    "summary": "The credit rating agency may lower Nvidia's credit rating to AA-, the fourth-highest rating.",
+    "link": "https://techcrunch.com/2026/11/25/sp-considers-nvidia-credit-downgrade-over-governance-and-key-man-risks/"
+  },
+  {
+    "category": "AI 科技",
+    "source": "TechCrunch AI",
+    "title": "OpenAI says heavy ChatGPT users may hit limits sooner as it merges Chat and Work",
+    "summary": "OpenAI will introduce a single usage meter across ChatGPT as it combines the Chat and Work experiences.",
+    "link": "https://techcrunch.com/2026/11/25/openai-says-heavy-chatgpt-users-may-hit-limits-sooner-as-it-merges-chat-and-work/"
+  },
+  {
+    "category": "美股财经",
+    "source": "CNBC Top News",
+    "title": "SpaceX, Musk pledge to donate a share each to active Trump Accounts",
+    "summary": "SpaceX said it will donate one share of the company's class A stock to every active Trump Account, and CEO Elon Musk would match it.",
+    "link": "https://www.cnbc.com/2026/11/25/spacex-musk-trump-account-stock.html"
+  },
+  {
+    "category": "美股财经",
+    "source": "CNBC Top News",
+    "title": "Trump, NATO chief caution Russia as attacks on Ukraine’s energy infrastructure intensify",
+    "summary": "Trump and NATO chief Mark Rutte urged Russia to avoid actions that could expand the war and called for a rapid peaceful resolution.",
+    "link": "https://www.cnbc.com/2026/11/26/trump-nato-rutte-russia-ukraine-war.html"
+  }
+]
