@@ -9,9 +9,30 @@
   {
     "category": "AI 科技",
     "source": "Hacker News",
+    "title": "Euro-Office comes to your desktop with the Nextcloud Office Desktop app",
+    "summary": "Article URL: https://nextcloud.com/blog/euro-office-comes-to-your-desktop-with-the-nextcloud-office-desktop-app/ Comments URL: https://news.ycombinator.com/item?id=50654289 Points: 29 # Comments: 1",
+    "link": "https://nextcloud.com/blog/euro-office-comes-to-your-desktop-with-the-nextcloud-office-desktop-app/"
+  },
+  {
+    "category": "AI 科技",
+    "source": "Hacker News",
     "title": "Intel One Mono font",
-    "summary": "Article URL: https://github.com/intel/intel-one-mono Comments URL: https://news.ycombinator.com/item?id=50653667 Points: 93 # Comments: 55",
+    "summary": "Article URL: https://github.com/intel/intel-one-mono Comments URL: https://news.ycombinator.com/item?id=50653667 Points: 144 # Comments: 84",
     "link": "https://github.com/intel/intel-one-mono"
+  },
+  {
+    "category": "AI 科技",
+    "source": "Hacker News",
+    "title": "Google Will Make AI Agents Use Its MCP Servers. The Gmail One Can't Send Email",
+    "summary": "Article URL: https://techstackups.com/articles/google-workspace-ai-agents-mcp/ Comments URL: https://news.ycombinator.com/item?id=50653477 Points: 74 # Comments: 66",
+    "link": "https://techstackups.com/articles/google-workspace-ai-agents-mcp/"
+  },
+  {
+    "category": "AI 科技",
+    "source": "Hacker News",
+    "title": "Moat: Your OpenRouter Replacement",
+    "summary": "Article URL: https://commandcode.ai/moat Comments URL: https://news.ycombinator.com/item?id=50652184 Points: 113 # Comments: 79",
+    "link": "https://commandcode.ai/moat"
   },
   {
     "category": "AI 科技",
@@ -28,6 +49,27 @@
     "link": "https://techcrunch.com/2026/11/25/openai-says-heavy-chatgpt-users-may-hit-limits-sooner-as-it-merges-chat-and-work/"
   },
   {
+    "category": "AI 科技",
+    "source": "TechCrunch AI",
+    "title": "Jensen Huang broke Nvidia’s code of conduct, and his employees may not forget it",
+    "summary": "Most codes of conduct serve as a reflection of corporate culture. In Nvidia's case, that could have consequences.",
+    "link": "https://techcrunch.com/2026/11/25/jensen-huang-broke-nvidias-code-of-conduct-and-his-employees-may-not-forget-it/"
+  },
+  {
+    "category": "AI 科技",
+    "source": "TechCrunch AI",
+    "title": "Anthropic’s Dario Amodei calls accusations of surrendering human control to AI ‘absurd’",
+    "summary": "Anthropic CEO Dario Amodei pushes back against rivals’ accusations that he favors surrendering human agency to AI, even as leading AI companies increasingly automate their own research and model devel",
+    "link": "https://techcrunch.com/2026/11/25/anthropics-dario-amodei-calls-accusations-of-surrendering-human-control-to-ai-absurd/"
+  },
+  {
+    "category": "AI 科技",
+    "source": "TechCrunch AI",
+    "title": "Want to buy your kid an AI toy this Christmas? Not in New York",
+    "summary": "New York has banned AI chatbot toys for five years as new research from Common Sense Media reveals troubling safety failures, including exposure to inappropriate content and risks to emotional develop",
+    "link": "https://techcrunch.com/2026/11/25/want-to-buy-your-kid-an-ai-toy-this-christmas-not-in-new-york/"
+  },
+  {
     "category": "美股财经",
     "source": "CNBC Top News",
     "title": "SpaceX, Musk pledge to donate a share each to active Trump Accounts",
@@ -40,5 +82,26 @@
     "title": "Trump, NATO chief caution Russia as attacks on Ukraine’s energy infrastructure intensify",
     "summary": "Trump and NATO chief Mark Rutte urged Russia to avoid actions that could expand the war and called for a rapid peaceful resolution.",
     "link": "https://www.cnbc.com/2026/11/26/trump-nato-rutte-russia-ukraine-war.html"
+  },
+  {
+    "category": "美股财经",
+    "source": "CNBC Top News",
+    "title": "The Nobel-winning science turning ‘water harvesting’ into a commercial race",
+    "summary": "Startups Atoco and Ahbstra are moving water-from-air machines toward commercial use, including for data centers and drought-hit communities.",
+    "link": "https://www.cnbc.com/atmospheric-water-harvesting-nobel-prize-atoco-ahbstra/"
+  },
+  {
+    "category": "美股财经",
+    "source": "CNBC Top News",
+    "title": "Global stocks rally as investors shrug off U.S. tariffs and AI jitters to 'fish for bargains'",
+    "summary": "Investors appeared to have shrugged off a fresh set of tariffs unveiled by the White House on Wednesday, targeting more than a dozen major trading partners.",
+    "link": "https://www.cnbc.com/2026/11/26/stock-markets-today-.html"
+  },
+  {
+    "category": "美股财经",
+    "source": "CNBC Top News",
+    "title": "Switzerland’s biggest bank set for showdown with lawmakers as capital fight intensifies amid crisis planning",
+    "summary": "Swiss regulator FINMA said UBS can execute its preferred crisis-resolution strategy, even as the bank faces a separate parliamentary fight over tougher capital requirements.",
+    "link": "https://www.cnbc.com/2026/11/26/ubs-swiss-capital-rules-finma-crisis-plan.html"
   }
 ]

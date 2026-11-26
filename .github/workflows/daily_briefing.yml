@@ -37,6 +37,9 @@ jobs:
           uv run playwright install-deps chromium
 
       - name: Generate today's 4:5 briefing video
+        env:
+          TZ: Asia/Shanghai
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           uv run python build_video.py --voice "${{ github.event.inputs.voice || 'zh-CN-XiaoxiaoNeural' }}" --rate "${{ github.event.inputs.rate || '+8%' }}"
 
