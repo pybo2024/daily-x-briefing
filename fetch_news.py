@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime
@@ -27,7 +28,12 @@ RSS_SOURCES = [
 GEMINI_MODELS = [
     "gemini-3.8-flash",
     "gemini-3.5-flash-lite",
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
 ]
+
+RETRYABLE_HTTP_CODES = {429, 500, 502, 503, 504}
+RETRY_DELAYS = (5, 15)
 
 
 def _clean_text(text: str) -> str:
@@ -117,35 +123,54 @@ def _summarize_with_gemini(
             f"https://generativelanguage.googleapis.com/v1beta/models/"
             f"{model}:generateContent?key={api_key}"
         )
-        req = urllib.request.Request(
-            url,
-            data=payload,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        try:
-            with urllib.request.urlopen(req, timeout=60) as resp:
-                body = json.loads(resp.read().decode("utf-8"))
-            raw_text = body["candidates"][0]["content"]["parts"][0]["text"]
-            parsed = json.loads(_strip_json_fences(raw_text))
-            items = parsed.get("items") if isinstance(parsed, dict) else None
-            if isinstance(items, list) and len(items) >= 5:
-                parsed["items"] = items[:5]
-                parsed["date"] = today_str
-                parsed.setdefault("edition", "AI 科技 · 美股财经早报")
-                parsed.setdefault("subtitle_badge", "5 条硬核进展 · 1 条市场边界")
-                parsed.setdefault("source_footer", "信源：公开财经与科技媒体 · 每日晨间编发")
-                parsed.setdefault(
-                    "outro_narration", "以上就是今天的全部早报内容，感谢收看，我们明天见。"
+        max_attempts = 1 + len(RETRY_DELAYS)
+        for attempt in range(1, max_attempts + 1):
+            req = urllib.request.Request(
+                url,
+                data=payload,
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=60) as resp:
+                    body = json.loads(resp.read().decode("utf-8"))
+                raw_text = body["candidates"][0]["content"]["parts"][0]["text"]
+                parsed = json.loads(_strip_json_fences(raw_text))
+                items = parsed.get("items") if isinstance(parsed, dict) else None
+                if isinstance(items, list) and len(items) >= 5:
+                    parsed["items"] = items[:5]
+                    parsed["date"] = today_str
+                    parsed["is_fallback"] = False
+                    parsed.setdefault("edition", "AI 科技 · 美股财经早报")
+                    parsed.setdefault("subtitle_badge", "5 条硬核进展 · 1 条市场边界")
+                    parsed.setdefault("source_footer", "信源：公开财经与科技媒体 · 每日晨间编发")
+                    parsed.setdefault(
+                        "outro_narration", "以上就是今天的全部早报内容，感谢收看，我们明天见。"
+                    )
+                    print(f"[0/4] Gemini ({model}) generated 5 fresh briefing items.")
+                    return parsed
+                print(
+                    f"[Gemini:{model}] Unexpected JSON shape: "
+                    f"keys={list(parsed.keys()) if isinstance(parsed, dict) else type(parsed)}"
                 )
-                print(f"[0/4] Gemini ({model}) generated 5 fresh briefing items.")
-                return parsed
-            print(f"[Gemini:{model}] Unexpected JSON shape: keys={list(parsed.keys()) if isinstance(parsed, dict) else type(parsed)}")
-        except urllib.error.HTTPError as exc:
-            err_body = exc.read().decode("utf-8", errors="ignore")[:300]
-            print(f"[Gemini:{model}] HTTP {exc.code}: {err_body}")
-        except Exception as exc:
-            print(f"[Gemini:{model}] Error: {exc}")
+                break
+            except urllib.error.HTTPError as exc:
+                err_body = exc.read().decode("utf-8", errors="ignore")[:300]
+                print(f"[Gemini:{model}] Attempt {attempt}/{max_attempts} HTTP {exc.code}: {err_body}")
+                if exc.code in RETRYABLE_HTTP_CODES and attempt < max_attempts:
+                    delay = RETRY_DELAYS[attempt - 1]
+                    print(f"[Gemini:{model}] Retrying in {delay}s...")
+                    time.sleep(delay)
+                    continue
+                break
+            except Exception as exc:
+                print(f"[Gemini:{model}] Attempt {attempt}/{max_attempts} Error: {exc}")
+                if attempt < max_attempts:
+                    delay = RETRY_DELAYS[attempt - 1]
+                    print(f"[Gemini:{model}] Retrying in {delay}s...")
+                    time.sleep(delay)
+                    continue
+                break
     return None
 
 
@@ -172,6 +197,7 @@ def build_daily_briefing(output_path: Path, sample_path: Path) -> Path:
         print("[0/4] Using sample_briefing.json fallback.")
         briefing_data = json.loads(sample_path.read_text(encoding="utf-8"))
         briefing_data["date"] = today_str
+        briefing_data["is_fallback"] = True
 
     output_path.write_text(json.dumps(briefing_data, ensure_ascii=False, indent=2), encoding="utf-8")
     return output_path

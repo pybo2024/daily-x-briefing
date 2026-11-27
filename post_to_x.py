@@ -210,6 +210,11 @@ def main() -> None:
         action="store_true",
         help="Exit cleanly if X API credentials are not set",
     )
+    parser.add_argument(
+        "--allow-fallback",
+        action="store_true",
+        help="Allow posting even if briefing used sample_briefing.json fallback",
+    )
     args = parser.parse_args()
 
     root = Path(__file__).parent
@@ -221,6 +226,12 @@ def main() -> None:
         tweet_text = args.text
     elif briefing_path.exists():
         data = json.loads(briefing_path.read_text(encoding="utf-8"))
+        if data.get("is_fallback") and not args.allow_fallback:
+            print(
+                "[X] Skipping auto-post: briefing used sample_briefing.json fallback "
+                "(pass --allow-fallback to override)."
+            )
+            return
         tweet_text = format_briefing_tweet(data)
     else:
         tweet_text = f"📊 AI 科技 · 美股财经早报 ({today_tag})\n\n#AI #美股 #科技早报"
