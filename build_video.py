@@ -12,6 +12,7 @@ from pathlib import Path
 import imageio_ffmpeg
 
 from fetch_news import build_daily_briefing
+from post_to_x import format_briefing_tweet, post_video_to_x
 from render_slides import render_all_slides
 from tts_engine import (
     DEFAULT_RATE,
@@ -196,6 +197,8 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=None, help="Output MP4 path")
     parser.add_argument("--voice", default=DEFAULT_VOICE, help="edge-tts voice name")
     parser.add_argument("--rate", default=DEFAULT_RATE, help="Speech rate, e.g. +8%%")
+    parser.add_argument("--post-to-x", action="store_true", help="Auto-post video to X (Twitter)")
+    parser.add_argument("--dry-run-x", action="store_true", help="Preview X post without uploading")
     args = parser.parse_args()
 
     root = Path(__file__).parent
@@ -211,6 +214,11 @@ def main() -> None:
     output_mp4 = args.output or (root / "output" / f"{today_tag}_daily_briefing.mp4")
     final_path = build_video(briefing_json, output_mp4, voice=args.voice, rate=args.rate)
     print(f"DONE! Video saved to: {final_path}")
+
+    if args.post_to_x or args.dry_run_x:
+        data = json.loads(briefing_json.read_text(encoding="utf-8"))
+        tweet_text = format_briefing_tweet(data)
+        post_video_to_x(final_path, tweet_text, dry_run=args.dry_run_x)
 
 
 if __name__ == "__main__":
