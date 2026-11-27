@@ -11,6 +11,11 @@ on:
         description: "Speech rate"
         required: false
         default: "+8%"
+      post_to_x:
+        description: "Auto-post video to X (Twitter)"
+        type: boolean
+        required: false
+        default: true
   schedule:
     # Runs daily around 07:17 Beijing Time (23:17 UTC) to avoid :00/:30 queue spikes
     - cron: "17 23 * * *"
@@ -49,3 +54,14 @@ jobs:
           name: daily-x-briefing-${{ github.run_number }}
           path: output/*.mp4
           retention-days: 14
+
+      - name: Auto-post video to X (Twitter)
+        if: github.event_name == 'schedule' || inputs.post_to_x == true
+        env:
+          TZ: Asia/Shanghai
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+        run: |
+          uv run python post_to_x.py --skip-if-unconfigured

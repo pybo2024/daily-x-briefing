@@ -20,3 +20,19 @@
    ```powershell
    uv run python build_video.py --voice zh-CN-XiaoxiaoNeural --rate +5%
    ```
+4. 生成视频并自动发布到 X (Twitter)：
+   ```powershell
+   uv run python build_video.py --post-to-x
+   ```
+   或单独发布已有视频（支持 `--dry-run` 预览文案长度）：
+   ```powershell
+   uv run python post_to_x.py --video output/YYYY-MM-DD_daily_briefing.mp4 --briefing data/YYYY-MM-DD.json --dry-run
+   ```
+
+## X (Twitter) 自动发帖配置
+需在环境变量或 GitHub Repository Secrets 中配置以下 4 个 OAuth 1.0a 凭据（需在 X Developer Portal 开启 **Read and Write** 权限）：
+- `X_API_KEY`
+- `X_API_SECRET`
+- `X_ACCESS_TOKEN`
+- `X_ACCESS_TOKEN_SECRET`
+
