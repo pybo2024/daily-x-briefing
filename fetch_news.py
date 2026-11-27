@@ -24,7 +24,11 @@ RSS_SOURCES = [
     ),
 ]
 
-GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"]
+GEMINI_MODELS = [
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+    "gemini-2.0-flash",
+]
 
 
 def _clean_text(text: str) -> str:
@@ -52,9 +56,17 @@ def fetch_rss_items(limit_per_feed: int = 5) -> list[dict[str, str]]:
                             "link": getattr(entry, "link", ""),
                         }
                     )
-        except Exception:
-            continue
+        except Exception as exc:
+            print(f"[RSS] Failed {source_name}: {exc}")
     return collected
+
+
+def _strip_json_fences(text: str) -> str:
+    text = text.strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```[a-zA-Z]*\n?", "", text)
+        text = re.sub(r"\n?```$", "", text)
+    return text.strip()
 
 
 def _summarize_with_gemini(
@@ -67,10 +79,10 @@ def _summarize_with_gemini(
     )
 
     prompt = f"""你是一位专业的美股财经与 AI 科技早报主编。今天是 {today_str}。
-请根据以下最新抓取的原始资讯，精选并编译成一份适合 4:5 竖屏短视频的中文早报 JSON（严格输出 JSON，不要 markdown 代码块）。
+请根据以下最新抓取的原始资讯，精选并编译成一份适合 4:5 竖屏短视频的中文早报 JSON（严格输出合法 JSON，不要 markdown 代码块）。
 
 要求：
-1. 必须包含 5 条新闻（`items` 数组长度必须为 5）：前 4 条覆盖 AI/科技热点与美股/财经动态，第 5 条可以是行业快讯或「事实边界/风险提示」（基于现有信息客观表述，不编造未出现的数据）。
+1. 必须包含 5 条新闻（`items` 数组长度必须为 5）：覆盖 AI/科技热点与美股/财经动态，第 5 条可以是行业快讯或「事实边界/风险提示」（基于现有信息客观表述，不编造未出现的数据）。
 2. 每条新闻包含：
    - `tag`: 简短分类标签（如 "AI 算力 · 美股风向"）
    - `title`: 12~20 字中文主标题
@@ -113,20 +125,28 @@ def _summarize_with_gemini(
             method="POST",
         )
         try:
-            with urllib.request.urlopen(req, timeout=45) as resp:
+            with urllib.request.urlopen(req, timeout=60) as resp:
                 body = json.loads(resp.read().decode("utf-8"))
-            text = body["candidates"][0]["content"]["parts"][0]["text"]
-            parsed = json.loads(text)
-            if (
-                isinstance(parsed, dict)
-                and isinstance(parsed.get("items"), list)
-                and len(parsed["items"]) == 5
-                and parsed.get("intro_narration")
-            ):
+            raw_text = body["candidates"][0]["content"]["parts"][0]["text"]
+            parsed = json.loads(_strip_json_fences(raw_text))
+            items = parsed.get("items") if isinstance(parsed, dict) else None
+            if isinstance(items, list) and len(items) >= 5:
+                parsed["items"] = items[:5]
                 parsed["date"] = today_str
+                parsed.setdefault("edition", "AI 科技 · 美股财经早报")
+                parsed.setdefault("subtitle_badge", "5 条硬核进展 · 1 条市场边界")
+                parsed.setdefault("source_footer", "信源：公开财经与科技媒体 · 每日晨间编发")
+                parsed.setdefault(
+                    "outro_narration", "以上就是今天的全部早报内容，感谢收看，我们明天见。"
+                )
+                print(f"[0/4] Gemini ({model}) generated 5 fresh briefing items.")
                 return parsed
-        except (urllib.error.URLError, KeyError, IndexError, json.JSONDecodeError, TimeoutError):
-            continue
+            print(f"[Gemini:{model}] Unexpected JSON shape: keys={list(parsed.keys()) if isinstance(parsed, dict) else type(parsed)}")
+        except urllib.error.HTTPError as exc:
+            err_body = exc.read().decode("utf-8", errors="ignore")[:300]
+            print(f"[Gemini:{model}] HTTP {exc.code}: {err_body}")
+        except Exception as exc:
+            print(f"[Gemini:{model}] Error: {exc}")
     return None
 
 
@@ -134,6 +154,7 @@ def build_daily_briefing(output_path: Path, sample_path: Path) -> Path:
     """Create today's briefing JSON; uses Gemini + live RSS if GEMINI_API_KEY is set."""
     today_str = datetime.now().strftime("%Y.%m.%d")
     rss_items = fetch_rss_items(limit_per_feed=5)
+    print(f"[0/4] Fetched {len(rss_items)} RSS headlines.")
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     if rss_items:
@@ -141,14 +162,15 @@ def build_daily_briefing(output_path: Path, sample_path: Path) -> Path:
         raw_path.write_text(json.dumps(rss_items, ensure_ascii=False, indent=2), encoding="utf-8")
 
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    print(f"[0/4] GEMINI_API_KEY configured: {bool(api_key)}")
+
     briefing_data: dict[str, Any] | None = None
     if api_key and rss_items:
         print("[0/4] Summarizing live RSS headlines via Gemini API...")
         briefing_data = _summarize_with_gemini(rss_items, today_str, api_key)
 
     if briefing_data is None:
-        if api_key:
-            print("[0/4] Gemini summary unavailable, falling back to sample template.")
+        print("[0/4] Using sample_briefing.json fallback.")
         briefing_data = json.loads(sample_path.read_text(encoding="utf-8"))
         briefing_data["date"] = today_str
 

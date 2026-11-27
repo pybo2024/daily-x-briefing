@@ -12,8 +12,8 @@ on:
         required: false
         default: "+8%"
   schedule:
-    # Runs daily at 07:30 Beijing Time (23:30 UTC)
-    - cron: "30 23 * * *"
+    # Runs daily around 07:17 Beijing Time (23:17 UTC) to avoid :00/:30 queue spikes
+    - cron: "17 23 * * *"
 
 jobs:
   build-video:
