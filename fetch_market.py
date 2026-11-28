@@ -146,7 +146,7 @@ def fetch_all_quotes() -> dict[str, list[dict[str, Any]]]:
     return result
 
 
-def fetch_mover_news(quotes: dict[str, list[dict[str, Any]]], top_n: int = 3) -> list[dict[str, str]]:
+def fetch_mover_news(quotes: dict[str, list[dict[str, Any]]], top_n: int = 4) -> list[dict[str, str]]:
     """Fetch recent Yahoo news for the biggest movers in Mag 7, Semis, and Crypto."""
     candidates: list[dict[str, Any]] = []
     for sector in ("mag7", "semis", "crypto"):
@@ -162,17 +162,15 @@ def fetch_mover_news(quotes: dict[str, list[dict[str, Any]]], top_n: int = 3) ->
             news_items = yf.Ticker(sym).news or []
             for entry in news_items[:2]:
                 content = entry.get("content", {}) if isinstance(entry, dict) else {}
-                title = (
-                    entry.get("title")
-                    or content.get("title")
-                    or ""
-                ).strip()
+                title = (entry.get("title") or content.get("title") or "").strip()
+                desc = (content.get("summary") or content.get("description") or "").strip()
                 if title:
                     headlines.append(
                         {
                             "symbol": sym,
                             "change_pct": f"{q['change_pct']:+.2f}%",
                             "title": title,
+                            "summary": re.sub(r"\s+", " ", desc)[:160],
                         }
                     )
         except Exception:
@@ -210,7 +208,9 @@ def _summarize_market_with_gemini(
     session_cn = SESSION_LABELS.get(session, "盘面速览")
     quotes_text = _format_quotes_for_prompt(quotes)
     mover_text = "\n".join(
-        f"- {m['symbol']} ({m['change_pct']}): {m['title']}" for m in mover_news
+        f"- {m['symbol']} ({m['change_pct']}): {m['title']}"
+        + (f" — {m['summary']}" if m.get("summary") else "")
+        for m in mover_news
     ) or "无明显个股异动新闻"
     rss_text = "\n".join(
         f"- [{it['source']}] {it['title']}" for it in rss_items[:8]
@@ -232,10 +232,9 @@ def _summarize_market_with_gemini(
    - 第1条 label 为 "大盘风向"
    - 第2条 label 为 "半导体·AI"
    - 第3条 label 为 "加密概念"
-4. `tweet_summary`: 55~85 字中文推文正文（不含标题和 hashtag），要求：
-   - 像真实财经博主点评，信息密度高、有观点、不说废话；
-   - 必须结合下方真实涨跌数据，最多只允许带 1 个 Cashtag（如 $NVDA，其余标的直接写代码或中文名，不要加 $ 符号）；
-   - 严格控制在 85 个汉字以内，以适配 X 普通账号 280 加权字符限制。
+4. `tweet_reason`: 35~52 字中文异动归因（只讲大盘方向 + 1~2 个领涨/领跌板块或个股的**具体新闻原因**，不要只报涨跌幅数字；最多只允许带 1 个 Cashtag，如 $NVDA，其余标的直接写中文名或代码，不加 $）。
+5. `tweet_takeaway`: 15~26 字中文简短锐评（点出市场资金信号、情绪拐点或核心矛盾，有博主观点，不带 $ 符号）。
+6. `tweet_summary`: 将 `tweet_reason` 与 `tweet_takeaway` 合并成不超过 80 字的完整推文正文。
 
 实时行情数据：
 {quotes_text}

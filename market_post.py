@@ -38,11 +38,27 @@ def format_market_tweet(
     session_cn = snapshot.get("session_cn", "盘面速览")
     et_date = snapshot.get("et_date", "")
     summary = snapshot.get("summary", {})
-    body = _limit_cashtags(str(summary.get("tweet_summary", "")).strip(), max_cashtags=1)
+
+    reason = _limit_cashtags(str(summary.get("tweet_reason", "")).strip(), max_cashtags=1)
+    takeaway = _limit_cashtags(str(summary.get("tweet_takeaway", "")).strip(), max_cashtags=0)
+    fallback_body = _limit_cashtags(str(summary.get("tweet_summary", "")).strip(), max_cashtags=1)
 
     header = f"📊 美股{session_cn} ({et_date})"
     footer = "#美股 #半导体 #加密概念"
 
+    if reason and takeaway:
+        takeaway_line = f"💡 {takeaway}"
+        candidate = f"{header}\n\n{reason}\n\n{takeaway_line}\n\n{footer}"
+        if x_weighted_length(candidate) <= max_weighted_len:
+            return candidate
+        # Trim reason first so the sharp takeaway is preserved intact
+        fixed = f"{header}\n\n\n\n{takeaway_line}\n\n{footer}"
+        reason_budget = max_weighted_len - x_weighted_length(fixed)
+        if reason_budget >= 30:
+            trimmed_reason = _truncate_weighted(reason, reason_budget)
+            return f"{header}\n\n{trimmed_reason}\n\n{takeaway_line}\n\n{footer}"
+
+    body = fallback_body or reason or takeaway
     candidate = f"{header}\n\n{body}\n\n{footer}"
     if x_weighted_length(candidate) <= max_weighted_len:
         return candidate
