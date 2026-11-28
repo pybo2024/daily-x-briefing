@@ -199,9 +199,85 @@ def post_video_to_x(
     }
 
 
+def post_image_to_x(
+    image_path: Path,
+    text: str,
+    *,
+    dry_run: bool = False,
+    skip_if_unconfigured: bool = False,
+) -> dict[str, Any] | None:
+    """Upload PNG/JPG image via X v1.1 media upload and publish Tweet via v2."""
+    if not image_path.exists():
+        raise FileNotFoundError(f"Image file not found: {image_path}")
+    size_kb = image_path.stat().st_size / 1024
+    if size_kb <= 0:
+        raise ValueError(f"Image file is empty: {image_path}")
+
+    weighted_len = x_weighted_length(text)
+    if weighted_len > X_MAX_WEIGHTED_CHARS:
+        raise ValueError(
+            f"Tweet text exceeds X weighted limit ({weighted_len}/{X_MAX_WEIGHTED_CHARS}):\n{text}"
+        )
+
+    if dry_run:
+        print("[X] Dry run mode — skipping API upload.")
+        print(f"[X] Image: {image_path} ({size_kb:.1f} KB)")
+        print(f"[X] Weighted length: {weighted_len}/{X_MAX_WEIGHTED_CHARS}")
+        print(f"[X] Tweet text:\n{text}")
+        return {
+            "dry_run": True,
+            "image": str(image_path),
+            "weighted_length": weighted_len,
+            "text": text,
+        }
+
+    creds, missing = get_x_credentials()
+    if creds is None:
+        msg = f"Missing X API credentials in environment: {', '.join(missing)}"
+        if skip_if_unconfigured:
+            print(f"[X] Skipping auto-post ({msg}).")
+            return None
+        raise RuntimeError(msg)
+
+    print(f"[X] Uploading image ({size_kb:.1f} KB) to X media endpoint...")
+    auth = tweepy.OAuth1UserHandler(
+        creds["api_key"],
+        creds["api_secret"],
+        creds["access_token"],
+        creds["access_token_secret"],
+    )
+    api = tweepy.API(auth, wait_on_rate_limit=True)
+    media = api.media_upload(
+        filename=str(image_path),
+        media_category="tweet_image",
+    )
+    media_id = str(media.media_id)
+    print(f"[X] Image uploaded (media_id={media_id}). Publishing tweet...")
+
+    client = tweepy.Client(
+        consumer_key=creds["api_key"],
+        consumer_secret=creds["api_secret"],
+        access_token=creds["access_token"],
+        access_token_secret=creds["access_token_secret"],
+        wait_on_rate_limit=True,
+    )
+    response = client.create_tweet(text=text, media_ids=[media_id])
+    tweet_id = str(response.data["id"])
+    tweet_url = f"https://x.com/i/web/status/{tweet_id}"
+    print(f"[X] Published! Tweet URL: {tweet_url}")
+    _write_step_summary(tweet_url, text)
+    return {
+        "tweet_id": tweet_id,
+        "url": tweet_url,
+        "media_id": media_id,
+        "text": text,
+    }
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Post daily briefing MP4 to X (Twitter)")
+    parser = argparse.ArgumentParser(description="Post daily briefing MP4 or image to X (Twitter)")
     parser.add_argument("--video", type=Path, default=None, help="Path to MP4 video")
+    parser.add_argument("--image", type=Path, default=None, help="Path to PNG/JPG image")
     parser.add_argument("--briefing", type=Path, default=None, help="Path to briefing JSON")
     parser.add_argument("--text", default=None, help="Custom tweet text (overrides briefing JSON)")
     parser.add_argument("--dry-run", action="store_true", help="Preview tweet without posting")
@@ -219,7 +295,6 @@ def main() -> None:
 
     root = Path(__file__).parent
     today_tag = datetime.now().strftime("%Y-%m-%d")
-    video_path = args.video or (root / "output" / f"{today_tag}_daily_briefing.mp4")
     briefing_path = args.briefing or (root / "data" / f"{today_tag}.json")
 
     if args.text:
@@ -236,6 +311,16 @@ def main() -> None:
     else:
         tweet_text = f"📊 AI 科技 · 美股财经早报 ({today_tag})\n\n#AI #美股 #科技早报"
 
+    if args.image is not None:
+        post_image_to_x(
+            args.image,
+            tweet_text,
+            dry_run=args.dry_run,
+            skip_if_unconfigured=args.skip_if_unconfigured,
+        )
+        return
+
+    video_path = args.video or (root / "output" / f"{today_tag}_daily_briefing.mp4")
     post_video_to_x(
         video_path,
         tweet_text,

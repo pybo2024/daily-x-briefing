@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, initial-scale=1.0" />
+<style>
+  :root {
+    --bg: #F5F0E6;
+    --bg-dot: rgba(166, 58, 43, 0.05);
+    --ink: #1E1B18;
+    --muted: #6E655B;
+    --accent: #A63A2B;
+    --accent-soft: rgba(166, 58, 43, 0.10);
+    --card: #FFFFFF;
+    --border: #E5DDD0;
+    --up: #15803D;
+    --up-bg: #DCFCE7;
+    --down: #B91C1C;
+    --down-bg: #FEE2E2;
+    --flat: #57534E;
+    --flat-bg: #F5F5F4;
+    --shadow: 0 6px 20px rgba(30, 27, 24, 0.05);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1080px;
+    height: 1350px;
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(var(--bg-dot) 1.5px, transparent 1.5px),
+      linear-gradient(to bottom, rgba(255,255,255,0.35), rgba(245,240,230,0.2));
+    background-size: 24px 24px, 100% 100%;
+    color: var(--ink);
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", "Segoe UI", sans-serif;
+    padding: 40px 48px 34px 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--accent);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--accent);
+  }
+  .top-bar .right-label {
+    color: var(--muted);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .header-block {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .headline-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .sentiment-pill {
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 19px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .sentiment-up { background: var(--up-bg); color: var(--up); }
+  .sentiment-down { background: var(--down-bg); color: var(--down); }
+  .sentiment-flat { background: var(--accent-soft); color: var(--accent); }
+
+  h1.headline {
+    font-size: 34px;
+    line-height: 1.25;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: -0.3px;
+  }
+
+  .bullets-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 6px solid var(--accent);
+    border-radius: 16px;
+    padding: 14px 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .bullet-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    font-size: 20px;
+    line-height: 1.4;
+  }
+  .bullet-tag {
+    background: var(--bg);
+    color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2px 10px;
+    font-size: 16px;
+    font-weight: 700;
+    min-width: 96px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .bullet-text {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .indices-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .index-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .index-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+  .index-price {
+    font-size: 25px;
+    font-weight: 800;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .index-chg {
+    font-size: 18px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sectors-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 14px;
+    flex: 1;
+    justify-content: center;
+  }
+  .sector-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 14px 18px;
+    box-shadow: var(--shadow);
+  }
+  .sector-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sector-sub {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .ticker-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .ticker-grid.cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .ticker-chip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 9px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+  }
+  .ticker-left {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+  }
+  .ticker-sym {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--ink);
+  }
+  .ticker-name {
+    font-size: 13px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ticker-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  .ticker-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .chg-badge {
+    font-size: 14px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 6px;
+  }
+
+  .up { color: var(--up); }
+  .down { color: var(--down); }
+  .flat { color: var(--flat); }
+  .bg-up { background: var(--up-bg); color: var(--up); }
+  .bg-down { background: var(--down-bg); color: var(--down); }
+  .bg-flat { background: var(--flat-bg); color: var(--flat); }
+
+  .footer {
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+  <div class="top-bar">
+    <span id="top-left">美股盘面速览 · 开盘快报</span>
+    <span class="right-label" id="top-right">ET 2026-11-27 09:40</span>
+  </div>
+
+  <div class="header-block">
+    <div class="headline-row">
+      <span class="sentiment-pill sentiment-flat" id="sentiment-pill">震荡</span>
+      <h1 class="headline" id="headline">美股盘面速览</h1>
+    </div>
+    <div class="bullets-box" id="bullets-box"></div>
+  </div>
+
+  <div class="indices-grid" id="indices-grid"></div>
+
+  <div class="sectors-wrap" id="sectors-wrap"></div>
+
+  <div class="footer">
+    <span>数据来源：Yahoo Finance · 仅供参考，不构成投资建议</span>
+    <span id="footer-tag">4:5 MARKET PULSE</span>
+  </div>
+</body>
+</html>

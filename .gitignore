@@ -4,8 +4,10 @@ __pycache__/
 *.py[cod]
 .build_tmp/
 
-# Generated videos (download from Releases/Artifacts or local output/)
+# Generated videos & market cards (download from Artifacts or local output/)
 output/*.mp4
+output/*.png
+data/*_market.json
 
 # OS files
 .DS_Store
