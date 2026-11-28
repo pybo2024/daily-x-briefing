@@ -43,6 +43,9 @@ jobs:
         env:
           TZ: Asia/Shanghai
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          FISH_AUDIO_API_KEY: ${{ secrets.FISH_AUDIO_API_KEY }}
+          FISH_AUDIO_REFERENCE_ID: ${{ secrets.FISH_AUDIO_REFERENCE_ID }}
+          FISH_AUDIO_MODEL: ${{ secrets.FISH_AUDIO_MODEL }}
         run: |
           uv run python build_video.py --voice "${{ github.event.inputs.voice || 'zh-CN-XiaoxiaoNeural' }}" --rate "${{ github.event.inputs.rate || '+8%' }}"
 

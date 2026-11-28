@@ -36,3 +36,9 @@
 - `X_ACCESS_TOKEN`
 - `X_ACCESS_TOKEN_SECRET`
 
+## Fish Audio 拟人女声配音配置（可选，未配置或失败时自动回退 `edge-tts`）
+无需自建服务器，只需在 [Fish Audio](https://fish.audio/) 注册获取 API Key（新账号可直接免费使用 `s2.1-pro-free` 模型）：
+- `FISH_AUDIO_API_KEY`：Fish Audio API Key
+- `FISH_AUDIO_REFERENCE_ID`（可选）：在 Fish Audio 音色库挑选喜欢的中英文女声，复制其模型 ID（不填则使用默认音色）
+- `FISH_AUDIO_MODEL`（可选，默认 `s2.1-pro-free`）：零余额可用 `s2.1-pro-free`；充值后可改为 `s2.1-pro`
+
