@@ -89,6 +89,9 @@ def build_video(
     output_mp4: Path,
     voice: str = DEFAULT_VOICE,
     rate: str = DEFAULT_RATE,
+    tts_backend: str = "auto",
+    fish_reference_id: str | None = None,
+    fish_model: str | None = None,
 ) -> Path:
     data = json.loads(briefing_json.read_text(encoding="utf-8"))
     root = Path(__file__).parent
@@ -106,8 +109,16 @@ def build_video(
             text = f"{text} {data['outro_narration']}"
         narrations.append(text)
 
-    print("[1/4] Generating free neural TTS voiceover...")
-    audio_segments = synthesize_narration_segments(narrations, work_dir, voice=voice, rate=rate)
+    print("[1/4] Generating neural TTS voiceover...")
+    audio_segments = synthesize_narration_segments(
+        narrations,
+        work_dir,
+        voice=voice,
+        rate=rate,
+        tts_backend=tts_backend,
+        fish_reference_id=fish_reference_id,
+        fish_model=fish_model,
+    )
 
     print("[2/4] Rendering 4:5 editorial card slides...")
     slide_stages = render_all_slides(data, work_dir)
@@ -219,6 +230,14 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=None, help="Output MP4 path")
     parser.add_argument("--voice", default=DEFAULT_VOICE, help="edge-tts voice name")
     parser.add_argument("--rate", default=DEFAULT_RATE, help="Speech rate, e.g. +8%%")
+    parser.add_argument(
+        "--tts-backend",
+        choices=["auto", "fish-audio", "edge-tts"],
+        default="auto",
+        help="TTS backend ('auto' uses Fish Audio if FISH_AUDIO_API_KEY is set, else edge-tts)",
+    )
+    parser.add_argument("--fish-reference-id", default=None, help="Fish Audio voice reference_id")
+    parser.add_argument("--fish-model", default=None, help="Fish Audio model header (e.g. s2.1-pro-free)")
     parser.add_argument("--post-to-x", action="store_true", help="Auto-post video to X (Twitter)")
     parser.add_argument("--dry-run-x", action="store_true", help="Preview X post without uploading")
     args = parser.parse_args()
@@ -234,7 +253,15 @@ def main() -> None:
         briefing_json = args.input
 
     output_mp4 = args.output or (root / "output" / f"{today_tag}_daily_briefing.mp4")
-    final_path = build_video(briefing_json, output_mp4, voice=args.voice, rate=args.rate)
+    final_path = build_video(
+        briefing_json,
+        output_mp4,
+        voice=args.voice,
+        rate=args.rate,
+        tts_backend=args.tts_backend,
+        fish_reference_id=args.fish_reference_id,
+        fish_model=args.fish_model,
+    )
     print(f"DONE! Video saved to: {final_path}")
 
     if args.post_to_x or args.dry_run_x:
