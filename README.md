@@ -36,3 +36,11 @@
 - `X_ACCESS_TOKEN`
 - `X_ACCESS_TOKEN_SECRET`
 
+## GPT-SoVITS 女声配音配置（可选，未配置或请求失败时自动回退到 `edge-tts`）
+支持对接 `RVC-Boss/GPT-SoVITS` 的 `api_v2.py`（`POST /tts`）接口，在环境变量或 GitHub Repository Secrets 中配置：
+- `GPT_SOVITS_API_URL`：你的 GPT-SoVITS 服务地址（例如 `https://your-host:9880`）
+- `GPT_SOVITS_REF_AUDIO`：GPT-SoVITS 服务器上的女声参考音频路径
+- `GPT_SOVITS_PROMPT_TEXT`：参考音频对应的文本内容（建议填写以提升音色还原度）
+- `GPT_SOVITS_PROMPT_LANG` / `GPT_SOVITS_TEXT_LANG`（可选，默认 `zh`）
+- `GPT_SOVITS_API_KEY`（可选，若你的接口前加了 Bearer Token 鉴权）
+

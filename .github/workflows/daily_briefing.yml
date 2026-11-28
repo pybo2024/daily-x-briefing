@@ -43,6 +43,12 @@ jobs:
         env:
           TZ: Asia/Shanghai
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GPT_SOVITS_API_URL: ${{ secrets.GPT_SOVITS_API_URL }}
+          GPT_SOVITS_REF_AUDIO: ${{ secrets.GPT_SOVITS_REF_AUDIO }}
+          GPT_SOVITS_PROMPT_TEXT: ${{ secrets.GPT_SOVITS_PROMPT_TEXT }}
+          GPT_SOVITS_PROMPT_LANG: ${{ secrets.GPT_SOVITS_PROMPT_LANG }}
+          GPT_SOVITS_TEXT_LANG: ${{ secrets.GPT_SOVITS_TEXT_LANG }}
+          GPT_SOVITS_API_KEY: ${{ secrets.GPT_SOVITS_API_KEY }}
         run: |
           uv run python build_video.py --voice "${{ github.event.inputs.voice || 'zh-CN-XiaoxiaoNeural' }}" --rate "${{ github.event.inputs.rate || '+8%' }}"
 

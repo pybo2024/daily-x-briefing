@@ -89,6 +89,10 @@ def build_video(
     output_mp4: Path,
     voice: str = DEFAULT_VOICE,
     rate: str = DEFAULT_RATE,
+    tts_backend: str = "auto",
+    gpt_sovits_url: str | None = None,
+    gpt_sovits_ref_audio: str | None = None,
+    gpt_sovits_prompt_text: str | None = None,
 ) -> Path:
     data = json.loads(briefing_json.read_text(encoding="utf-8"))
     root = Path(__file__).parent
@@ -106,8 +110,17 @@ def build_video(
             text = f"{text} {data['outro_narration']}"
         narrations.append(text)
 
-    print("[1/4] Generating free neural TTS voiceover...")
-    audio_segments = synthesize_narration_segments(narrations, work_dir, voice=voice, rate=rate)
+    print("[1/4] Generating neural TTS voiceover...")
+    audio_segments = synthesize_narration_segments(
+        narrations,
+        work_dir,
+        voice=voice,
+        rate=rate,
+        tts_backend=tts_backend,
+        gpt_sovits_url=gpt_sovits_url,
+        gpt_sovits_ref_audio=gpt_sovits_ref_audio,
+        gpt_sovits_prompt_text=gpt_sovits_prompt_text,
+    )
 
     print("[2/4] Rendering 4:5 editorial card slides...")
     slide_stages = render_all_slides(data, work_dir)
@@ -219,6 +232,19 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=None, help="Output MP4 path")
     parser.add_argument("--voice", default=DEFAULT_VOICE, help="edge-tts voice name")
     parser.add_argument("--rate", default=DEFAULT_RATE, help="Speech rate, e.g. +8%%")
+    parser.add_argument(
+        "--tts-backend",
+        choices=["auto", "gpt-sovits", "edge-tts"],
+        default="auto",
+        help="TTS backend ('auto' uses GPT-SoVITS if configured, else edge-tts)",
+    )
+    parser.add_argument("--gpt-sovits-url", default=None, help="GPT-SoVITS api_v2.py base URL")
+    parser.add_argument(
+        "--gpt-sovits-ref-audio", default=None, help="Reference audio path on GPT-SoVITS server"
+    )
+    parser.add_argument(
+        "--gpt-sovits-prompt-text", default=None, help="Transcript of reference audio"
+    )
     parser.add_argument("--post-to-x", action="store_true", help="Auto-post video to X (Twitter)")
     parser.add_argument("--dry-run-x", action="store_true", help="Preview X post without uploading")
     args = parser.parse_args()
@@ -234,7 +260,16 @@ def main() -> None:
         briefing_json = args.input
 
     output_mp4 = args.output or (root / "output" / f"{today_tag}_daily_briefing.mp4")
-    final_path = build_video(briefing_json, output_mp4, voice=args.voice, rate=args.rate)
+    final_path = build_video(
+        briefing_json,
+        output_mp4,
+        voice=args.voice,
+        rate=args.rate,
+        tts_backend=args.tts_backend,
+        gpt_sovits_url=args.gpt_sovits_url,
+        gpt_sovits_ref_audio=args.gpt_sovits_ref_audio,
+        gpt_sovits_prompt_text=args.gpt_sovits_prompt_text,
+    )
     print(f"DONE! Video saved to: {final_path}")
 
     if args.post_to_x or args.dry_run_x:
