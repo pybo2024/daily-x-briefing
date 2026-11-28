@@ -129,6 +129,15 @@ def build_video(
             global_cues.append((time_offset + s, time_offset + e, txt))
         time_offset += dur
 
+    max_x_seconds = 115.0
+    speed = time_offset / max_x_seconds if time_offset > max_x_seconds else 1.0
+    if speed > 1.0:
+        print(
+            f"[4/4] Total duration {time_offset:.1f}s exceeds {max_x_seconds:.0f}s X limit; "
+            f"speeding up {speed:.2f}x to fit under 2 minutes."
+        )
+        global_cues = [(s / speed, e / speed, txt) for s, e, txt in global_cues]
+
     ass_path = write_ass_subtitles(global_cues, work_dir / "subtitles.ass")
 
     concat_list = work_dir / "clips_concat.txt"
@@ -154,6 +163,18 @@ def build_video(
     output_mp4.parent.mkdir(parents=True, exist_ok=True)
     # Use relative path for ass filter on Windows to avoid drive-letter colon escaping issues
     ass_rel = ass_path.relative_to(root).as_posix()
+    vf_filter = f"setpts=PTS/{speed:.6f},ass={ass_rel}" if speed > 1.0 else f"ass={ass_rel}"
+    af_args: list[str] = []
+    if speed > 1.0:
+        # FFmpeg atempo supports 0.5..2.0 per stage
+        rem = speed
+        atempo_parts: list[str] = []
+        while rem > 2.0:
+            atempo_parts.append("atempo=2.0")
+            rem /= 2.0
+        atempo_parts.append(f"atempo={rem:.6f}")
+        af_args = ["-af", ",".join(atempo_parts)]
+
     ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
     proc = subprocess.run(
         [
@@ -162,7 +183,8 @@ def build_video(
             "-i",
             str(merged_raw),
             "-vf",
-            f"ass={ass_rel}",
+            vf_filter,
+            *af_args,
             "-c:v",
             "libx264",
             "-preset",

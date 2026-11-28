@@ -92,7 +92,7 @@ def _summarize_with_gemini(
    - `tag`: 简短分类标签（如 "AI 算力 · 美股风向"）
    - `title`: 12~20 字中文主标题
    - `summary`: 18~28 字一句话摘要（用于总览页）
-   - `narration`: 65~95 字自然口语播报稿（适合女声朗读，避免英文缩写堆砌）
+   - `narration`: 45~65 字自然口语播报稿（适合女声朗读，避免英文缩写堆砌）
    - `hero_card`: {{"badge": "8~12字小标签", "title": "14~22字核心结论", "subtitle": "18~30字补充说明", "metric_value": "2~6字关键数字或状态", "metric_label": "4~6字指标名"}}
    - `detail_cards`: 2 个对象，每个 {{"label": "4字标签", "text": "18~30字要点"}}
    - `source`: "信源：具体媒体名"
@@ -101,7 +101,7 @@ def _summarize_with_gemini(
    - `edition`: "AI 科技 · 美股财经早报"
    - `subtitle_badge`: "5 条硬核进展 · 1 条市场边界"
    - `source_footer`: "信源：公开财经与科技媒体 · 每日晨间编发"
-   - `intro_narration`: 50~75 字开场白，概括今天 5 大看点
+   - `intro_narration`: 35~50 字开场白，概括今天 5 大看点
    - `outro_narration`: "以上就是今天的全部早报内容，感谢收看，我们明天见。"
 
 原始资讯如下：
