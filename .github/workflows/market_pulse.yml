@@ -17,15 +17,8 @@ on:
         type: boolean
         required: false
         default: true
-  # Triggered on NYSE weekdays; scripts skip US holidays automatically via --skip-non-trading.
-  # Note: Cron uses UTC. Adjust +/- 1h if desired, or trigger externally via workflow_dispatch.
-  schedule:
-    # ~09:40 ET (EDT=13:40 UTC, EST=14:40 UTC) -> run at 14:40 UTC (or use external cron)
-    - cron: "40 14 * * 1-5"
-    # ~13:00 ET (EST=18:00 UTC)
-    - cron: "0 18 * * 1-5"
-    # ~16:10 ET (EST=21:10 UTC)
-    - cron: "10 21 * * 1-5"
+  # Triggered on NYSE weekdays (09:40 / 13:00 / 16:10 America/New_York)
+  # via external cron calling workflow_dispatch. Non-trading days are skipped automatically.
 
 jobs:
   market-pulse:
@@ -59,7 +52,7 @@ jobs:
         run: |
           SESSION="${{ github.event.inputs.session || 'auto' }}"
           POST_FLAG=""
-          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event.inputs.post_to_x }}" = "true" ]; then
+          if [ "${{ github.event.inputs.post_to_x }}" != "false" ]; then
             POST_FLAG="--post-to-x --skip-if-unconfigured"
           fi
           uv run python market_post.py --session "$SESSION" --skip-non-trading $POST_FLAG
