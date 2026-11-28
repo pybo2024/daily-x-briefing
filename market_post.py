@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,20 @@ from post_to_x import X_MAX_WEIGHTED_CHARS, _truncate_weighted, post_image_to_x,
 from render_market_card import render_market_card
 
 
+def _limit_cashtags(text: str, max_cashtags: int = 1) -> str:
+    """Keep at most max_cashtags $SYMBOL tokens; strip '$' from extra cashtags."""
+    count = 0
+
+    def _repl(match: re.Match[str]) -> str:
+        nonlocal count
+        count += 1
+        if count <= max_cashtags:
+            return match.group(0)
+        return match.group(1)
+
+    return re.sub(r"\$([A-Za-z]{1,6})\b", _repl, text)
+
+
 def format_market_tweet(
     snapshot: dict[str, Any], max_weighted_len: int = X_MAX_WEIGHTED_CHARS
 ) -> str:
@@ -23,7 +38,7 @@ def format_market_tweet(
     session_cn = snapshot.get("session_cn", "盘面速览")
     et_date = snapshot.get("et_date", "")
     summary = snapshot.get("summary", {})
-    body = str(summary.get("tweet_summary", "")).strip()
+    body = _limit_cashtags(str(summary.get("tweet_summary", "")).strip(), max_cashtags=1)
 
     header = f"📊 美股{session_cn} ({et_date})"
     footer = "#美股 #半导体 #加密概念"
