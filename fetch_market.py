@@ -226,7 +226,7 @@ def _summarize_market_with_gemini(
 {session_focus}
 
 请严格输出合法 JSON（不要 markdown 代码块），字段如下：
-1. `card_headline`: 12~20 字中文卡片主标题（概括今日大盘与主线，不带引号）。
+1. `card_headline`: 12~20 字中文卡片主标题（概括今日大盘与主线，不带引号；若新闻提及美国购物节 "Black Friday"，请译为"黑五购物季"或"感恩节次日"，切勿译为易被误解为暴跌的"黑色星期五"）。
 2. `sentiment`: 只能是 "偏强"、"震荡" 或 "偏弱" 之一。
 3. `card_bullets`: 长度为 3 的数组，每条为一个对象 {{"label": "4~5字标签", "text": "18~28字精炼分析"}}，分别覆盖：
    - 第1条 label 为 "大盘风向"
