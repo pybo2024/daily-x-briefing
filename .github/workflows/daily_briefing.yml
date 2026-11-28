@@ -16,9 +16,7 @@ on:
         type: boolean
         required: false
         default: true
-  schedule:
-    # Runs daily around 07:17 Beijing Time (23:17 UTC) to avoid :00/:30 queue spikes
-    - cron: "17 23 * * *"
+  # Triggered daily at 07:17 Beijing Time via external cron calling workflow_dispatch
 
 jobs:
   build-video:
